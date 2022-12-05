@@ -85,7 +85,13 @@ class Logger:
 
         else:
             klass = klass_or_methods
-            methods = [attr for _, attr in klass.__dict__.items() if inspect.isfunction(attr)]
+
+            methods = [
+                getattr(klass, attrname)
+                for attrname in dir(klass)
+                if inspect.isfunction(getattr(klass, attrname))
+            ]
+
             self._log_class(klass, methods)
 
         return klass
@@ -101,20 +107,17 @@ class Logger:
 logger = Logger()
 
 
-@logger.log_class(['foo', 'baz'])
-class TestClass:
+class SomeBaseClass:
+    def save(self):
+        pass
+
+
+@logger.log_class
+class MyClass(SomeBaseClass):
     def foo(self):
-        return 1
-
-    def bar(self):
-        return self.foo() * 2
-
-    def baz(self):
-        return self.bar() * 2
+        pass
 
 
-tc = TestClass()
-print(tc.baz())
-
+MyClass().save()
 
 logger.print()
